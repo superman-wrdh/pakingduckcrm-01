@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Eye, EyeOff, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
 
 const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -15,7 +16,20 @@ const SignUp = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    company: ''
+  });
   const navigate = useNavigate();
+  const { signUp, user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      navigate("/dashboard");
+    }
+  }, [user, navigate]);
 
   const passwordRequirements = [
     { label: "At least 8 characters", met: password.length >= 8 },
@@ -48,15 +62,26 @@ const SignUp = () => {
 
     setIsLoading(true);
     
-    // Simulate signup
-    setTimeout(() => {
-      setIsLoading(false);
+    const { error } = await signUp(formData.email, password, {
+      first_name: formData.firstName,
+      last_name: formData.lastName,
+      company: formData.company
+    });
+    
+    if (error) {
       toast({
-                title: "Account created successfully!",
-                description: "Welcome to Peking Duck. You can now sign in.",
+        title: "Sign up failed",
+        description: error.message,
+        variant: "destructive",
+      });
+      setIsLoading(false);
+    } else {
+      toast({
+        title: "Account created successfully!",
+        description: "Please check your email to verify your account.",
       });
       navigate("/signin");
-    }, 1000);
+    }
   };
 
   return (
@@ -122,6 +147,8 @@ const SignUp = () => {
                   <Input
                     id="firstName"
                     placeholder="John"
+                    value={formData.firstName}
+                    onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
                     required
                   />
                 </div>
@@ -130,6 +157,8 @@ const SignUp = () => {
                   <Input
                     id="lastName"
                     placeholder="Doe"
+                    value={formData.lastName}
+                    onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
                     required
                   />
                 </div>
@@ -141,6 +170,8 @@ const SignUp = () => {
                   id="email"
                   type="email"
                   placeholder="john.doe@company.com"
+                  value={formData.email}
+                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                   required
                 />
               </div>
@@ -150,6 +181,8 @@ const SignUp = () => {
                 <Input
                   id="company"
                   placeholder="Your company name"
+                  value={formData.company}
+                  onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
                   required
                 />
               </div>

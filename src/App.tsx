@@ -4,6 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme-provider";
+import { AuthProvider } from "@/hooks/useAuth";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { CRMLayout } from "@/components/layouts/CRMLayout";
 import Dashboard from "./pages/Dashboard";
 import Community from "./pages/Community";
@@ -30,109 +32,147 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider defaultTheme="system" storageKey="crm-theme">
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<SignIn />} />
-          <Route path="/signin" element={<SignIn />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/dashboard" element={
-            <CRMLayout>
-              <Dashboard />
-            </CRMLayout>
-          } />
-          <Route path="/community" element={
-            <CRMLayout>
-              <Community />
-            </CRMLayout>
-          } />
-          <Route path="/how-to" element={
-            <CRMLayout>
-              <Guide />
-            </CRMLayout>
-          } />
-          <Route path="/guide" element={
-            <CRMLayout>
-              <Guide />
-            </CRMLayout>
-          } />
-          <Route path="/notifications" element={
-            <CRMLayout>
-              <Notifications />
-            </CRMLayout>
-          } />
-          <Route path="/projects" element={
-            <CRMLayout>
-              <Projects />
-            </CRMLayout>
-          } />
-          <Route path="/duck-ai" element={
-            <CRMLayout>
-              <DuckAI />
-            </CRMLayout>
-          } />
-          <Route path="/profile" element={
-            <CRMLayout>
-              <Profile />
-            </CRMLayout>
-          } />
-          <Route path="/chat" element={
-            <CRMLayout>
-              <Chat />
-            </CRMLayout>
-          } />
-          <Route path="/payment" element={
-            <CRMLayout>
-              <Payment />
-            </CRMLayout>
-          } />
-          <Route path="/statistics" element={
-            <CRMLayout>
-              <Statistics />
-            </CRMLayout>
-          } />
-          <Route path="/settings" element={
-            <CRMLayout>
-              <UpdatedSettings />
-            </CRMLayout>
-          } />
-          <Route path="/clients-management" element={
-            <CRMLayout>
-              <ClientsManagement />
-            </CRMLayout>
-          } />
-          <Route path="/projects-management" element={
-            <CRMLayout>
-              <Projects />
-            </CRMLayout>
-          } />
-          <Route path="/projects-management/design" element={
-            <CRMLayout>
-              <Contract />
-            </CRMLayout>
-          } />
-          <Route path="/projects-management/manufacturing" element={
-            <CRMLayout>
-              <RFQ />
-            </CRMLayout>
-          } />
-          <Route path="/projects-management/completed" element={
-            <CRMLayout>
-              <Invoice />
-            </CRMLayout>
-          } />
-          <Route path="/designer-management" element={
-            <CRMLayout>
-              <DesignerManagement />
-            </CRMLayout>
-          } />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<SignIn />} />
+            <Route path="/signin" element={<SignIn />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <CRMLayout>
+                  <Dashboard />
+                </CRMLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/community" element={
+              <ProtectedRoute>
+                <CRMLayout>
+                  <Community />
+                </CRMLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/how-to" element={
+              <ProtectedRoute>
+                <CRMLayout>
+                  <Guide />
+                </CRMLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/guide" element={
+              <ProtectedRoute>
+                <CRMLayout>
+                  <Guide />
+                </CRMLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/notifications" element={
+              <ProtectedRoute>
+                <CRMLayout>
+                  <Notifications />
+                </CRMLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/projects" element={
+              <ProtectedRoute>
+                <CRMLayout>
+                  <Projects />
+                </CRMLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/duck-ai" element={
+              <ProtectedRoute>
+                <CRMLayout>
+                  <DuckAI />
+                </CRMLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <CRMLayout>
+                  <Profile />
+                </CRMLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/chat" element={
+              <ProtectedRoute>
+                <CRMLayout>
+                  <Chat />
+                </CRMLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/payment" element={
+              <ProtectedRoute>
+                <CRMLayout>
+                  <Payment />
+                </CRMLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/statistics" element={
+              <ProtectedRoute>
+                <CRMLayout>
+                  <Statistics />
+                </CRMLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/settings" element={
+              <ProtectedRoute>
+                <CRMLayout>
+                  <UpdatedSettings />
+                </CRMLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/clients-management" element={
+              <ProtectedRoute>
+                <CRMLayout>
+                  <ClientsManagement />
+                </CRMLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/projects-management" element={
+              <ProtectedRoute>
+                <CRMLayout>
+                  <Projects />
+                </CRMLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/projects-management/design" element={
+              <ProtectedRoute>
+                <CRMLayout>
+                  <Contract />
+                </CRMLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/projects-management/manufacturing" element={
+              <ProtectedRoute>
+                <CRMLayout>
+                  <RFQ />
+                </CRMLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/projects-management/completed" element={
+              <ProtectedRoute>
+                <CRMLayout>
+                  <Invoice />
+                </CRMLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/designer-management" element={
+              <ProtectedRoute>
+                <CRMLayout>
+                  <DesignerManagement />
+                </CRMLayout>
+              </ProtectedRoute>
+            } />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
     </ThemeProvider>
   </QueryClientProvider>
 );
