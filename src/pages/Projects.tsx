@@ -482,7 +482,7 @@ const Projects = () => {
                               <Eye className="h-4 w-4" />
                             </Button>
                           </SheetTrigger>
-                          <SheetContent className="w-[140vw] max-w-none">
+                          <SheetContent className="w-[66.67vw] max-w-none">
                             <ProjectDetailsView project={selectedProject} />
                           </SheetContent>
                         </Sheet>
