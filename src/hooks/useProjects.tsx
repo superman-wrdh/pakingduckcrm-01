@@ -5,6 +5,7 @@ export interface Project {
   id: string;
   name: string;
   client: string;
+  designer?: string;
   type: string;
   status: string;
   description?: string;

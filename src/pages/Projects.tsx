@@ -31,13 +31,14 @@ const Projects = () => {
     name: "",
     client: "",
     type: "",
+    designer: "",
     description: "",
     due_date: ""
   });
 
 
   const handleCreateProject = async () => {
-    if (!newProjectForm.name || !newProjectForm.client || !newProjectForm.type || !newProjectForm.description || !newProjectForm.due_date) {
+    if (!newProjectForm.name || !newProjectForm.client || !newProjectForm.type || !newProjectForm.designer || !newProjectForm.description || !newProjectForm.due_date) {
       alert("Please fill in all fields");
       return;
     }
@@ -54,6 +55,7 @@ const Projects = () => {
           name: newProjectForm.name,
           client: newProjectForm.client,
           type: newProjectForm.type,
+          designer: newProjectForm.designer,
           description: newProjectForm.description,
           due_date: newProjectForm.due_date,
           status: "project initiation",
@@ -65,7 +67,7 @@ const Projects = () => {
       }
 
       // Reset form and close dialog
-      setNewProjectForm({ name: "", client: "", type: "", description: "", due_date: "" });
+      setNewProjectForm({ name: "", client: "", type: "", designer: "", description: "", due_date: "" });
       setIsNewProjectDialogOpen(false);
       
       // Refresh the projects list
@@ -93,6 +95,15 @@ const Projects = () => {
     "Product Design",
     "Web Design",
     "Print Design"
+  ];
+
+  const designerOptions = [
+    "John Smith",
+    "Sarah Johnson", 
+    "Mike Chen",
+    "Lisa Wang",
+    "David Brown",
+    "Emma Wilson"
   ];
 
   const clients = [...new Set(projects.map(p => p.client))];
@@ -169,6 +180,23 @@ const Projects = () => {
                       {typeOptions.map((type) => (
                         <SelectItem key={type} value={type}>
                           {type}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="project-designer" className="text-right">
+                    Designer
+                  </Label>
+                  <Select value={newProjectForm.designer} onValueChange={(value) => setNewProjectForm(prev => ({ ...prev, designer: value }))}>
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Select designer" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {designerOptions.map((designer) => (
+                        <SelectItem key={designer} value={designer}>
+                          {designer}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -281,20 +309,22 @@ const Projects = () => {
         <Card>
           <CardContent className="p-0">
             <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Project Name</TableHead>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
+               <TableHeader>
+                 <TableRow>
+                   <TableHead>Project Name</TableHead>
+                   <TableHead>Client</TableHead>
+                   <TableHead>Designer</TableHead>
+                   <TableHead>Type</TableHead>
+                   <TableHead>Status</TableHead>
+                   <TableHead className="text-right">Actions</TableHead>
+                 </TableRow>
+               </TableHeader>
               <TableBody>
                 {filteredProjects.map((project) => (
                   <TableRow key={project.id} className="hover:bg-muted/50">
                     <TableCell className="font-medium">{project.name}</TableCell>
                     <TableCell>{project.client}</TableCell>
+                    <TableCell>{project.designer || 'Not assigned'}</TableCell>
                     <TableCell>{project.type}</TableCell>
                     <TableCell>
                       <Badge className={getStatusColor(project.status)}>
