@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Eye, UserPlus, Trash2, X, Plus, Search, Users, UserCheck } from "lucide-react";
+import { Eye, UserPlus, Trash2, X, Plus, Search, Users, UserCheck, Loader2 } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -43,15 +43,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
-
-interface Designer {
-  id: string;
-  name: string;
-  status: "Active" | "Inactive" | "Busy";
-  email: string;
-  type: "Senior Designer" | "Junior Designer" | "Lead Designer" | "UI/UX Designer";
-  location: string;
-}
+import { useDesignerProfiles, Designer } from "@/hooks/useDesignerProfiles";
 
 interface Project {
   id: string;
@@ -62,88 +54,6 @@ interface Project {
   description: string;
 }
 
-const mockDesigners: Designer[] = [
-  {
-    id: "1",
-    name: "Alice Johnson",
-    status: "Active",
-    email: "alice.johnson@company.com",
-    type: "Senior Designer",
-    location: "New York, USA"
-  },
-  {
-    id: "2",
-    name: "Bob Chen",
-    status: "Busy",
-    email: "bob.chen@company.com",
-    type: "UI/UX Designer",
-    location: "San Francisco, USA"
-  },
-  {
-    id: "3",
-    name: "Carol Martinez",
-    status: "Active",
-    email: "carol.martinez@company.com",
-    type: "Lead Designer",
-    location: "Los Angeles, USA"
-  },
-  {
-    id: "4",
-    name: "David Kim",
-    status: "Inactive",
-    email: "david.kim@company.com",
-    type: "Junior Designer",
-    location: "Seattle, USA"
-  },
-  {
-    id: "5",
-    name: "Emma Wilson",
-    status: "Active",
-    email: "emma.wilson@company.com",
-    type: "Senior Designer",
-    location: "Chicago, USA"
-  },
-  {
-    id: "6",
-    name: "Frank Brown",
-    status: "Busy",
-    email: "frank.brown@company.com",
-    type: "UI/UX Designer",
-    location: "Boston, USA"
-  },
-  {
-    id: "7",
-    name: "Grace Lee",
-    status: "Active",
-    email: "grace.lee@company.com",
-    type: "Senior Designer",
-    location: "Austin, USA"
-  },
-  {
-    id: "8",
-    name: "Henry Garcia",
-    status: "Active",
-    email: "henry.garcia@company.com",
-    type: "Lead Designer",
-    location: "Miami, USA"
-  },
-  {
-    id: "9",
-    name: "Ivy Zhang",
-    status: "Inactive",
-    email: "ivy.zhang@company.com",
-    type: "Junior Designer",
-    location: "Portland, USA"
-  },
-  {
-    id: "10",
-    name: "Jack Thompson",
-    status: "Active",
-    email: "jack.thompson@company.com",
-    type: "Senior Designer",
-    location: "Denver, USA"
-  },
-];
 
 const ITEMS_PER_PAGE = 10;
 
@@ -198,6 +108,7 @@ const designerProjects: { [key: string]: string[] } = {
 };
 
 export default function DesignerManagement() {
+  const { designers, loading, error, refetch } = useDesignerProfiles();
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedDesigner, setSelectedDesigner] = useState<Designer | null>(null);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
@@ -205,10 +116,9 @@ export default function DesignerManagement() {
   const [selectedProjects, setSelectedProjects] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const totalPages = Math.ceil(mockDesigners.length / ITEMS_PER_PAGE);
   
   // Filter designers based on search and status
-  const filteredDesigners = mockDesigners.filter(designer => {
+  const filteredDesigners = designers.filter(designer => {
     const matchesSearch = designer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          designer.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || designer.status.toLowerCase() === statusFilter.toLowerCase();
@@ -221,8 +131,8 @@ export default function DesignerManagement() {
   const currentDesigners = filteredDesigners.slice(startIndex, endIndex);
 
   // Statistics
-  const totalDesigners = mockDesigners.length;
-  const activeDesigners = mockDesigners.filter(d => d.status === "Active").length;
+  const totalDesigners = designers.length;
+  const activeDesigners = designers.filter(d => d.status === "Active").length;
 
   const getStatusVariant = (status: Designer["status"]) => {
     switch (status) {
@@ -238,7 +148,7 @@ export default function DesignerManagement() {
   };
 
   const handleProjectsList = (designerId: string) => {
-    const designer = mockDesigners.find(d => d.id === designerId);
+    const designer = designers.find(d => d.id === designerId);
     if (designer) {
       setSelectedDesigner(designer);
       setShowDetailsDialog(true);
@@ -246,7 +156,7 @@ export default function DesignerManagement() {
   };
 
   const handleAssignProject = (designerId: string) => {
-    const designer = mockDesigners.find(d => d.id === designerId);
+    const designer = designers.find(d => d.id === designerId);
     if (designer) {
       setSelectedDesigner(designer);
       setSelectedProjects(designerProjects[designerId] || []);
@@ -288,6 +198,28 @@ export default function DesignerManagement() {
       setSelectedProjects([]);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
+          <p className="text-muted-foreground">Loading designers...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <p className="text-destructive mb-4">{error}</p>
+          <Button onClick={refetch}>Try Again</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
