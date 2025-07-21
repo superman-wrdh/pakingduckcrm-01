@@ -44,71 +44,16 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useDesignerProfiles, Designer } from "@/hooks/useDesignerProfiles";
-
-interface Project {
-  id: string;
-  name: string;
-  status: "Active" | "Completed" | "On Hold";
-  startDate: string;
-  endDate?: string;
-  description: string;
-}
-
+import { useProjects, Project as ProjectType } from "@/hooks/useProjects";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const ITEMS_PER_PAGE = 10;
 
-// Mock projects data
-const mockProjects: Project[] = [
-  {
-    id: "1",
-    name: "E-commerce Website Redesign",
-    status: "Active",
-    startDate: "2024-01-15",
-    description: "Complete redesign of the e-commerce platform"
-  },
-  {
-    id: "2",
-    name: "Mobile App UI Design",
-    status: "Completed",
-    startDate: "2023-10-01",
-    endDate: "2023-12-15",
-    description: "UI design for mobile application"
-  },
-  {
-    id: "3",
-    name: "Brand Identity Package",
-    status: "Active",
-    startDate: "2024-02-01",
-    description: "Complete brand identity design package"
-  },
-  {
-    id: "4",
-    name: "Dashboard Analytics Tool",
-    status: "Completed",
-    startDate: "2023-08-01",
-    endDate: "2023-11-30",
-    description: "Analytics dashboard interface design"
-  },
-  {
-    id: "5",
-    name: "Marketing Website",
-    status: "On Hold",
-    startDate: "2024-01-01",
-    description: "Marketing website design and development"
-  }
-];
-
-// Mock designer-project assignments
-const designerProjects: { [key: string]: string[] } = {
-  "1": ["1", "3"], // Alice has projects 1 and 3
-  "2": ["2"], // Bob has project 2
-  "3": ["4"], // Carol has project 4
-  "4": [], // David has no projects
-  "5": ["5"], // Emma has project 5
-};
-
 export default function DesignerManagement() {
   const { designers, loading, error, refetch } = useDesignerProfiles();
+  const { projects, loading: projectsLoading, refetch: refetchProjects } = useProjects();
+  const { toast } = useToast();
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedDesigner, setSelectedDesigner] = useState<Designer | null>(null);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
@@ -159,7 +104,11 @@ export default function DesignerManagement() {
     const designer = designers.find(d => d.id === designerId);
     if (designer) {
       setSelectedDesigner(designer);
-      setSelectedProjects(designerProjects[designerId] || []);
+      // Get currently assigned projects for this designer
+      const assignedProjects = projects
+        .filter(p => p.designer === designer.name)
+        .map(p => p.id);
+      setSelectedProjects(assignedProjects);
       setShowAssignDialog(true);
     }
   };
@@ -169,17 +118,25 @@ export default function DesignerManagement() {
     // Handle delete logic here
   };
 
-  const getDesignerProjects = (designerId: string) => {
-    const projectIds = designerProjects[designerId] || [];
-    return projectIds.map(id => mockProjects.find(p => p.id === id)!).filter(Boolean);
+  const getDesignerProjects = (designerName: string) => {
+    return projects.filter(p => p.designer === designerName);
   };
 
-  const getCurrentProjects = (designerId: string) => {
-    return getDesignerProjects(designerId).filter(p => p.status === "Active");
+  const getCurrentProjects = (designerName: string) => {
+    return getDesignerProjects(designerName).filter(p => 
+      !['complete', 'delivering'].includes(p.status)
+    );
   };
 
-  const getPastProjects = (designerId: string) => {
-    return getDesignerProjects(designerId).filter(p => p.status === "Completed");
+  const getPastProjects = (designerName: string) => {
+    return getDesignerProjects(designerName).filter(p => 
+      p.status === 'complete'
+    );
+  };
+
+  // Get available projects for assignment (status = "project initiation")
+  const getAvailableProjects = () => {
+    return projects.filter(p => p.status === "project initiation");
   };
 
   const handleProjectToggle = (projectId: string) => {
@@ -190,16 +147,55 @@ export default function DesignerManagement() {
     );
   };
 
-  const handleSaveAssignment = () => {
-    if (selectedDesigner) {
-      designerProjects[selectedDesigner.id] = selectedProjects;
+  const handleSaveAssignment = async () => {
+    if (!selectedDesigner) return;
+
+    try {
+      // Get all available projects
+      const availableProjects = getAvailableProjects();
+      
+      // Update projects: remove designer from unselected projects, add designer to selected projects
+      for (const project of availableProjects) {
+        const shouldBeAssigned = selectedProjects.includes(project.id);
+        const currentlyAssigned = project.designer === selectedDesigner.name;
+        
+        if (shouldBeAssigned && !currentlyAssigned) {
+          // Assign designer to this project
+          await supabase
+            .from('projects')
+            .update({ designer: selectedDesigner.name })
+            .eq('id', project.id);
+        } else if (!shouldBeAssigned && currentlyAssigned) {
+          // Remove designer from this project
+          await supabase
+            .from('projects')
+            .update({ designer: null })
+            .eq('id', project.id);
+        }
+      }
+
+      // Refresh projects data
+      await refetchProjects();
+      
+      toast({
+        title: "Assignment Updated",
+        description: `Projects successfully assigned to ${selectedDesigner.name}`,
+      });
+      
       setShowAssignDialog(false);
       setSelectedDesigner(null);
       setSelectedProjects([]);
+    } catch (error) {
+      console.error('Error updating project assignments:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update project assignments",
+        variant: "destructive",
+      });
     }
   };
 
-  if (loading) {
+  if (loading || projectsLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
@@ -472,20 +468,20 @@ export default function DesignerManagement() {
 
               <div className="space-y-4">
                 <div>
-                  <h4 className="font-medium text-lg mb-3">Current Projects</h4>
-                  {getCurrentProjects(selectedDesigner.id).length > 0 ? (
-                    <div className="space-y-2">
-                      {getCurrentProjects(selectedDesigner.id).map((project) => (
+                   <h4 className="font-medium text-lg mb-3">Current Projects</h4>
+                   {getCurrentProjects(selectedDesigner.name).length > 0 ? (
+                     <div className="space-y-2">
+                       {getCurrentProjects(selectedDesigner.name).map((project) => (
                         <div key={project.id} className="p-3 border rounded-lg">
                           <div className="flex items-start justify-between">
                             <div>
                               <h5 className="font-medium">{project.name}</h5>
-                              <p className="text-sm text-muted-foreground">{project.description}</p>
-                              <p className="text-xs text-muted-foreground mt-1">
-                                Started: {project.startDate}
+                               <p className="text-sm text-muted-foreground">{project.description}</p>
+                               <p className="text-xs text-muted-foreground mt-1">
+                                 Started: {new Date(project.created_at).toLocaleDateString()}
                               </p>
                             </div>
-                            <Badge variant="default">{project.status}</Badge>
+                             <Badge variant="default">{project.status}</Badge>
                           </div>
                         </div>
                       ))}
@@ -496,17 +492,17 @@ export default function DesignerManagement() {
                 </div>
 
                 <div>
-                  <h4 className="font-medium text-lg mb-3">Past Projects</h4>
-                  {getPastProjects(selectedDesigner.id).length > 0 ? (
-                    <div className="space-y-2">
-                      {getPastProjects(selectedDesigner.id).map((project) => (
+                   <h4 className="font-medium text-lg mb-3">Past Projects</h4>
+                   {getPastProjects(selectedDesigner.name).length > 0 ? (
+                     <div className="space-y-2">
+                       {getPastProjects(selectedDesigner.name).map((project) => (
                         <div key={project.id} className="p-3 border rounded-lg bg-muted/30">
                           <div className="flex items-start justify-between">
                             <div>
                               <h5 className="font-medium">{project.name}</h5>
-                              <p className="text-sm text-muted-foreground">{project.description}</p>
-                              <p className="text-xs text-muted-foreground mt-1">
-                                {project.startDate} - {project.endDate}
+                               <p className="text-sm text-muted-foreground">{project.description}</p>
+                               <p className="text-xs text-muted-foreground mt-1">
+                                 {new Date(project.created_at).toLocaleDateString()} - {new Date(project.updated_at).toLocaleDateString()}
                               </p>
                             </div>
                             <Badge variant="secondary">{project.status}</Badge>
@@ -535,7 +531,7 @@ export default function DesignerManagement() {
           </DialogHeader>
           
           <div className="space-y-4 max-h-96 overflow-y-auto">
-            {mockProjects.map((project) => (
+            {getAvailableProjects().map((project) => (
               <div key={project.id} className="flex items-start space-x-3 p-3 border rounded-lg">
                 <Checkbox
                   id={project.id}
@@ -552,12 +548,12 @@ export default function DesignerManagement() {
                   <p className="text-xs text-muted-foreground mt-1">
                     {project.description}
                   </p>
-                  <div className="flex items-center gap-2 mt-2">
-                    <Badge variant={project.status === "Active" ? "default" : project.status === "Completed" ? "secondary" : "outline"}>
-                      {project.status}
-                    </Badge>
-                    <span className="text-xs text-muted-foreground">
-                      Started: {project.startDate}
+                   <div className="flex items-center gap-2 mt-2">
+                     <Badge variant="outline">
+                       {project.status}
+                     </Badge>
+                     <span className="text-xs text-muted-foreground">
+                       Due: {new Date(project.due_date).toLocaleDateString()}
                     </span>
                   </div>
                 </div>
