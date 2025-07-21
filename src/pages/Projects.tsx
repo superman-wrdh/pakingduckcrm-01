@@ -15,8 +15,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Plus, Eye, UserPlus, Trash2, Download, CheckCircle2, Calendar, User, Image } from "lucide-react";
 import { useState } from "react";
+import { useProjects } from "@/hooks/useProjects";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 const Projects = () => {
+  const { projects, loading, getProjectStats, getStatusColor } = useProjects();
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedClient, setSelectedClient] = useState("");
   const [selectedDesigner, setSelectedDesigner] = useState("");
@@ -25,227 +30,51 @@ const Projects = () => {
   const [newProjectForm, setNewProjectForm] = useState({
     name: "",
     client: "",
-    designer: "",
-    description: ""
+    type: "",
+    description: "",
+    due_date: ""
   });
 
-  const handleDelete = (projectId: number) => {
-    console.log("Delete project:", projectId);
-    // Handle delete logic here
-  };
 
-  const handleCreateProject = () => {
-    if (!newProjectForm.name || !newProjectForm.client || !newProjectForm.designer || !newProjectForm.description) {
+  const handleCreateProject = async () => {
+    if (!newProjectForm.name || !newProjectForm.client || !newProjectForm.type || !newProjectForm.description || !newProjectForm.due_date) {
       alert("Please fill in all fields");
       return;
     }
     
-    const newProject = {
-      id: projects.length + 1,
-      name: newProjectForm.name,
-      client: newProjectForm.client,
-      designer: newProjectForm.designer,
-      status: "project initiation",
-      progress: 1,
-      description: newProjectForm.description,
-      startDate: new Date().toISOString().split('T')[0],
-      deadline: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 60 days from now
-      projectManager: newProjectForm.designer,
-      email: `${newProjectForm.designer.toLowerCase().replace(' ', '.')}@company.com`,
-      attachments: {
-        contract: `${newProjectForm.name.toLowerCase().replace(/\s+/g, '-')}-contract.pdf`,
-        rfq: `${newProjectForm.name.toLowerCase().replace(/\s+/g, '-')}-rfq.pdf`,
-        invoice: `${newProjectForm.name.toLowerCase().replace(/\s+/g, '-')}-invoice.pdf`
-      },
-      designs: []
-    };
-
-    console.log("Creating new project:", newProject);
-    // Here you would typically add the project to your state/database
-    
-    // Reset form and close dialog
-    setNewProjectForm({ name: "", client: "", designer: "", description: "" });
-    setIsNewProjectDialogOpen(false);
-  };
-
-  const projects = [
-    {
-      id: 1,
-      name: "Organic Tea Collection",
-      client: "Green Leaf Co.",
-      designer: "Sarah Johnson",
-      status: "design development",
-      progress: 2, // design stage
-      description: "A comprehensive packaging design for organic tea products featuring eco-friendly materials and elegant branding.",
-      startDate: "2024-01-15",
-      deadline: "2024-03-15",
-      projectManager: "Sarah Johnson",
-      email: "sarah.johnson@company.com",
-      attachments: {
-        contract: "organic-tea-contract.pdf",
-        rfq: "organic-tea-rfq.pdf",
-        invoice: "organic-tea-invoice.pdf"
-      },
-      designs: [
-        { id: 1, name: "Initial Concept", version: "v1.0", date: "2024-01-20", image: "/lovable-uploads/041ed525-f28d-4ee3-87e3-6a639240ce08.png" },
-        { id: 2, name: "Refined Design", version: "v2.0", date: "2024-02-10", image: "/lovable-uploads/041ed525-f28d-4ee3-87e3-6a639240ce08.png" },
-        { id: 3, name: "Final Version", version: "v3.0", date: "2024-02-25", image: "/lovable-uploads/041ed525-f28d-4ee3-87e3-6a639240ce08.png" }
-      ]
-    },
-    {
-      id: 2,
-      name: "Luxury Perfume Box",
-      client: "Essence Beauty",
-      designer: "Mike Chen",
-      status: "prototyping",
-      progress: 3, // manufacturing stage
-      description: "Premium luxury packaging design for high-end perfume collection with custom finishes and materials.",
-      startDate: "2024-02-01",
-      deadline: "2024-04-01",
-      projectManager: "Mike Chen",
-      email: "mike.chen@company.com",
-      attachments: {
-        contract: "perfume-box-contract.pdf",
-        rfq: "perfume-box-rfq.pdf",
-        invoice: "perfume-box-invoice.pdf"
-      },
-      designs: [
-        { id: 1, name: "Luxury Concept", version: "v1.0", date: "2024-02-05", image: "/lovable-uploads/041ed525-f28d-4ee3-87e3-6a639240ce08.png" },
-        { id: 2, name: "Premium Design", version: "v2.0", date: "2024-02-20", image: "/lovable-uploads/041ed525-f28d-4ee3-87e3-6a639240ce08.png" }
-      ]
-    },
-    {
-      id: 3,
-      name: "Electronics Packaging",
-      client: "TechFlow Inc.",
-      designer: "Emma Davis",
-      status: "complete",
-      progress: 5, // completed
-      description: "Protective and branded packaging solution for electronic components and accessories.",
-      startDate: "2023-12-01",
-      deadline: "2024-02-28",
-      projectManager: "Emma Davis",
-      email: "emma.davis@company.com",
-      attachments: {
-        contract: "electronics-contract.pdf",
-        rfq: "electronics-rfq.pdf",
-        invoice: "electronics-invoice.pdf"
-      },
-      designs: [
-        { id: 1, name: "Tech Design", version: "v1.0", date: "2023-12-15", image: "/lovable-uploads/041ed525-f28d-4ee3-87e3-6a639240ce08.png" },
-        { id: 2, name: "Final Tech Design", version: "v2.0", date: "2024-01-10", image: "/lovable-uploads/041ed525-f28d-4ee3-87e3-6a639240ce08.png" },
-        { id: 3, name: "Production Ready", version: "v3.0", date: "2024-02-01", image: "/lovable-uploads/041ed525-f28d-4ee3-87e3-6a639240ce08.png" }
-      ]
-    },
-    {
-      id: 4,
-      name: "Artisan Chocolate Boxes",
-      client: "Sweet Dreams",
-      designer: "Alex Kim",
-      status: "project initiation",
-      progress: 1, // preparation stage
-      description: "Handcrafted packaging design for premium artisan chocolate collection with seasonal variations.",
-      startDate: "2024-03-01",
-      deadline: "2024-05-01",
-      projectManager: "Alex Kim",
-      email: "alex.kim@company.com",
-      attachments: {
-        contract: "chocolate-contract.pdf",
-        rfq: "chocolate-rfq.pdf",
-        invoice: "chocolate-invoice.pdf"
-      },
-      designs: [
-        { id: 1, name: "Artisan Concept", version: "v1.0", date: "2024-03-05", image: "/lovable-uploads/041ed525-f28d-4ee3-87e3-6a639240ce08.png" }
-      ]
-    },
-    {
-      id: 5,
-      name: "Wine Label Design",
-      client: "Vintage Cellars",
-      designer: "Lisa Wang",
-      status: "testing & refinement",
-      progress: 3, // manufacturing stage
-      description: "Elegant wine label and packaging design reflecting the heritage and quality of vintage wines.",
-      startDate: "2024-01-20",
-      deadline: "2024-04-20",
-      projectManager: "Lisa Wang",
-      email: "lisa.wang@company.com",
-      attachments: {
-        contract: "wine-label-contract.pdf",
-        rfq: "wine-label-rfq.pdf",
-        invoice: "wine-label-invoice.pdf"
-      },
-      designs: [
-        { id: 1, name: "Classic Label", version: "v1.0", date: "2024-01-25", image: "/lovable-uploads/041ed525-f28d-4ee3-87e3-6a639240ce08.png" },
-        { id: 2, name: "Vintage Style", version: "v2.0", date: "2024-02-15", image: "/lovable-uploads/041ed525-f28d-4ee3-87e3-6a639240ce08.png" }
-      ]
-    },
-    {
-      id: 6,
-      name: "Cosmetic Line Packaging",
-      client: "Beauty Plus",
-      designer: "David Lee",
-      status: "production",
-      progress: 4, // shipment stage
-      description: "Complete packaging system for new cosmetic line including boxes, tubes, and promotional materials.",
-      startDate: "2024-02-10",
-      deadline: "2024-05-10",
-      projectManager: "David Lee",
-      email: "david.lee@company.com",
-      attachments: {
-        contract: "cosmetic-contract.pdf",
-        rfq: "cosmetic-rfq.pdf",
-        invoice: "cosmetic-invoice.pdf"
-      },
-      designs: [
-        { id: 1, name: "Cosmetic Line Design", version: "v1.0", date: "2024-02-15", image: "/lovable-uploads/041ed525-f28d-4ee3-87e3-6a639240ce08.png" },
-        { id: 2, name: "Updated Design", version: "v2.0", date: "2024-03-01", image: "/lovable-uploads/041ed525-f28d-4ee3-87e3-6a639240ce08.png" }
-      ]
-    },
-    {
-      id: 7,
-      name: "Software Box Design",
-      client: "CodeCraft",
-      designer: "Sarah Johnson",
-      status: "delivering",
-      progress: 4, // shipment stage
-      description: "Professional software packaging design for enterprise software products with technical specifications.",
-      startDate: "2024-01-05",
-      deadline: "2024-03-05",
-      projectManager: "Sarah Johnson",
-      email: "sarah.johnson@company.com",
-      attachments: {
-        contract: "software-contract.pdf",
-        rfq: "software-rfq.pdf",
-        invoice: "software-invoice.pdf"
-      },
-      designs: [
-        { id: 1, name: "Software Box V1", version: "v1.0", date: "2024-01-10", image: "/lovable-uploads/041ed525-f28d-4ee3-87e3-6a639240ce08.png" },
-        { id: 2, name: "Software Box V2", version: "v2.0", date: "2024-01-25", image: "/lovable-uploads/041ed525-f28d-4ee3-87e3-6a639240ce08.png" }
-      ]
-    },
-    {
-      id: 8,
-      name: "Jewelry Box Collection",
-      client: "Diamond Dreams",
-      designer: "Mike Chen",
-      status: "design development",
-      progress: 2, // design stage
-      description: "Luxury jewelry packaging collection with velvet interiors and premium finishes for high-end jewelry pieces.",
-      startDate: "2024-02-15",
-      deadline: "2024-04-15",
-      projectManager: "Mike Chen",
-      email: "mike.chen@company.com",
-      attachments: {
-        contract: "jewelry-contract.pdf",
-        rfq: "jewelry-rfq.pdf",
-        invoice: "jewelry-invoice.pdf"
-      },
-      designs: [
-        { id: 1, name: "Jewelry Collection", version: "v1.0", date: "2024-02-20", image: "/lovable-uploads/041ed525-f28d-4ee3-87e3-6a639240ce08.png" }
-      ]
+    if (!user) {
+      alert("You must be logged in to create a project");
+      return;
     }
-  ];
+
+    try {
+      const { error } = await supabase
+        .from('projects')
+        .insert({
+          name: newProjectForm.name,
+          client: newProjectForm.client,
+          type: newProjectForm.type,
+          description: newProjectForm.description,
+          due_date: newProjectForm.due_date,
+          status: "project initiation",
+          user_id: user.id
+        });
+
+      if (error) {
+        throw error;
+      }
+
+      // Reset form and close dialog
+      setNewProjectForm({ name: "", client: "", type: "", description: "", due_date: "" });
+      setIsNewProjectDialogOpen(false);
+      
+      // Refresh the projects list
+      window.location.reload();
+    } catch (error) {
+      console.error('Error creating project:', error);
+      alert('Failed to create project');
+    }
+  };
 
   const statusOptions = [
     "project initiation",
@@ -257,30 +86,26 @@ const Projects = () => {
     "complete"
   ];
 
-  const clients = [...new Set(projects.map(p => p.client))];
-  const designers = [...new Set(projects.map(p => p.designer))];
+  const typeOptions = [
+    "Packaging Design",
+    "Label Design", 
+    "Brand Identity",
+    "Product Design",
+    "Web Design",
+    "Print Design"
+  ];
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "project initiation": return "bg-gray-100 text-gray-800";
-      case "design development": return "bg-blue-100 text-blue-800";
-      case "prototyping": return "bg-purple-100 text-purple-800";
-      case "testing & refinement": return "bg-yellow-100 text-yellow-800";
-      case "production": return "bg-orange-100 text-orange-800";
-      case "delivering": return "bg-cyan-100 text-cyan-800";
-      case "complete": return "bg-green-100 text-green-800";
-      default: return "bg-gray-100 text-gray-800";
-    }
-  };
+  const clients = [...new Set(projects.map(p => p.client))];
+  const stats = getProjectStats();
+
 
   const filteredProjects = projects.filter(project => {
     const matchesSearch = project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          project.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         project.designer.toLowerCase().includes(searchTerm.toLowerCase());
+                         project.type.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesClient = !selectedClient || selectedClient === "all-clients" || project.client === selectedClient;
-    const matchesDesigner = !selectedDesigner || selectedDesigner === "all-designers" || project.designer === selectedDesigner;
     
-    return matchesSearch && matchesClient && matchesDesigner;
+    return matchesSearch && matchesClient;
   });
 
   return (
@@ -324,35 +149,42 @@ const Projects = () => {
                   <Label htmlFor="project-client" className="text-right">
                     Client
                   </Label>
-                  <Select value={newProjectForm.client} onValueChange={(value) => setNewProjectForm(prev => ({ ...prev, client: value }))}>
+                  <Input
+                    id="project-client"
+                    value={newProjectForm.client}
+                    onChange={(e) => setNewProjectForm(prev => ({ ...prev, client: e.target.value }))}
+                    className="col-span-3"
+                    placeholder="Enter client name"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="project-type" className="text-right">
+                    Type
+                  </Label>
+                  <Select value={newProjectForm.type} onValueChange={(value) => setNewProjectForm(prev => ({ ...prev, type: value }))}>
                     <SelectTrigger className="col-span-3">
-                      <SelectValue placeholder="Select client" />
+                      <SelectValue placeholder="Select project type" />
                     </SelectTrigger>
                     <SelectContent>
-                      {clients.map((client) => (
-                        <SelectItem key={client} value={client}>
-                          {client}
+                      {typeOptions.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {type}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="project-designer" className="text-right">
-                    Designer
+                  <Label htmlFor="project-due-date" className="text-right">
+                    Due Date
                   </Label>
-                  <Select value={newProjectForm.designer} onValueChange={(value) => setNewProjectForm(prev => ({ ...prev, designer: value }))}>
-                    <SelectTrigger className="col-span-3">
-                      <SelectValue placeholder="Select designer" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {designers.map((designer) => (
-                        <SelectItem key={designer} value={designer}>
-                          {designer}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Input
+                    id="project-due-date"
+                    type="date"
+                    value={newProjectForm.due_date}
+                    onChange={(e) => setNewProjectForm(prev => ({ ...prev, due_date: e.target.value }))}
+                    className="col-span-3"
+                  />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="project-description" className="text-right">
@@ -382,26 +214,26 @@ const Projects = () => {
         <div className="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
             <CardContent className="p-6">
-              <div className="text-2xl font-bold text-foreground">8</div>
+              <div className="text-2xl font-bold text-foreground">{stats.totalProjects}</div>
               <p className="text-sm text-muted-foreground">Total Projects</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-6">
-              <div className="text-2xl font-bold text-foreground">6</div>
+              <div className="text-2xl font-bold text-foreground">{stats.activeProjects}</div>
               <p className="text-sm text-muted-foreground">Active Projects</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-6">
-              <div className="text-2xl font-bold text-foreground">1</div>
+              <div className="text-2xl font-bold text-foreground">{stats.completedThisMonth}</div>
               <p className="text-sm text-muted-foreground">Completed This Month</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-6">
-              <div className="text-2xl font-bold text-foreground">3</div>
-              <p className="text-sm text-muted-foreground">Unpaid Projects</p>
+              <div className="text-2xl font-bold text-foreground">{stats.inProgress}</div>
+              <p className="text-sm text-muted-foreground">In Progress</p>
             </CardContent>
           </Card>
         </div>
@@ -432,13 +264,13 @@ const Projects = () => {
           </Select>
           <Select value={selectedDesigner} onValueChange={setSelectedDesigner}>
             <SelectTrigger className="w-full sm:w-48">
-              <SelectValue placeholder="Filter by designer" />
+              <SelectValue placeholder="Filter by type" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all-designers">All designers</SelectItem>
-              {designers.map((designer) => (
-                <SelectItem key={designer} value={designer}>
-                  {designer}
+              <SelectItem value="all-types">All types</SelectItem>
+              {typeOptions.map((type) => (
+                <SelectItem key={type} value={type}>
+                  {type}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -453,7 +285,7 @@ const Projects = () => {
                 <TableRow>
                   <TableHead>Project Name</TableHead>
                   <TableHead>Client</TableHead>
-                  <TableHead>Designer</TableHead>
+                  <TableHead>Type</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -463,7 +295,7 @@ const Projects = () => {
                   <TableRow key={project.id} className="hover:bg-muted/50">
                     <TableCell className="font-medium">{project.name}</TableCell>
                     <TableCell>{project.client}</TableCell>
-                    <TableCell>{project.designer}</TableCell>
+                    <TableCell>{project.type}</TableCell>
                     <TableCell>
                       <Badge className={getStatusColor(project.status)}>
                         {project.status}
@@ -506,7 +338,7 @@ const Projects = () => {
                             <AlertDialogFooter>
                               <AlertDialogCancel>Cancel</AlertDialogCancel>
                               <AlertDialogAction
-                                onClick={() => handleDelete(project.id)}
+                                onClick={() => console.log('Delete project:', project.id)}
                                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                               >
                                 Delete

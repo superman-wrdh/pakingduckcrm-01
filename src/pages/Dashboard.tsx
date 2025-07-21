@@ -23,98 +23,61 @@ import {
   Settings,
   DollarSign
 } from "lucide-react";
+import { useProjects } from "@/hooks/useProjects";
 
 const Dashboard = () => {
-  const projects = [
-    {
-      id: 1,
-      name: "Artisan Coffee Packaging",
-      client: "Bean & Brew Co.",
-      status: "Manufacturing",
-      progress: 75,
-      phase: "Quality Testing",
-      dueDate: "Dec 15, 2024",
-      team: 4
-    },
-    {
-      id: 2,
-      name: "Premium Tea Collection",
-      client: "Zen Tea House",
-      status: "Shipping",
-      progress: 95,
-      phase: "In Transit",
-      dueDate: "Dec 10, 2024",
-      team: 3
-    },
-    {
-      id: 3,
-      name: "Energy Drink Labels",
-      client: "Power Sports Inc.",
-      status: "Design",
-      progress: 40,
-      phase: "Client Review",
-      dueDate: "Dec 20, 2024",
-      team: 5
-    },
-    {
-      id: 4,
-      name: "Luxury Wine Bottles",
-      client: "Vintage Estates",
-      status: "Complete",
-      progress: 100,
-      phase: "Delivered",
-      dueDate: "Dec 5, 2024",
-      team: 6
-    }
-  ];
+  const { projects, loading, getProjectStats, getStatusColor, getProgressPercentage } = useProjects();
+  const stats = getProjectStats();
 
-  const stats = [
+  const dashboardStats = [
     {
-      title: "Total Revenues",
-      value: "$284,500",
-      change: "+18% from last month",
-      icon: DollarSign,
-      color: "text-green-600"
-    },
-    {
-      title: "Active Projects",
-      value: "12",
+      title: "Total Projects",
+      value: stats.totalProjects.toString(),
       change: "+2 from last month",
       icon: Package,
       color: "text-blue-600"
     },
     {
-      title: "In Manufacturing",
-      value: "8",
-      change: "+3 this week",
-      icon: Factory,
+      title: "Active Projects",
+      value: stats.activeProjects.toString(),
+      change: "+1 from last week",
+      icon: Clock,
       color: "text-orange-600"
     },
     {
-      title: "Ready to Ship",
-      value: "5",
-      change: "2 shipped today",
-      icon: Truck,
-      color: "text-green-600"
+      title: "In Progress",
+      value: stats.inProgress.toString(),
+      change: "+3 this week",
+      icon: Factory,
+      color: "text-purple-600"
     },
     {
-      title: "Completed",
-      value: "127",
-      change: "+15 this month",
+      title: "Completed This Month",
+      value: stats.completedThisMonth.toString(),
+      change: "On track",
       icon: CheckCircle,
-      color: "text-purple-600"
+      color: "text-green-600"
     }
   ];
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Design": return "bg-blue-100 text-blue-800";
-      case "Manufacturing": return "bg-orange-100 text-orange-800";
-      case "Shipping": return "bg-yellow-100 text-yellow-800";
-      case "Complete": return "bg-green-100 text-green-800";
-      default: return "bg-gray-100 text-gray-800";
-    }
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
   };
+
+  if (loading) {
+    return (
+      <div className="p-6 space-y-8">
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <p className="text-muted-foreground">Loading dashboard data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-8">
@@ -126,8 +89,8 @@ const Dashboard = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        {stats.map((stat, index) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {dashboardStats.map((stat, index) => (
           <Card key={index}>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
@@ -135,6 +98,7 @@ const Dashboard = () => {
                   <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
                   <p className="text-2xl font-bold">{stat.value}</p>
                 </div>
+                <stat.icon className={`h-5 w-5 ${stat.color}`} />
               </div>
             </CardContent>
           </Card>
@@ -155,7 +119,7 @@ const Dashboard = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {projects.map((project) => (
+              {projects.slice(0, 5).map((project) => (
                 <div key={project.id} className="space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="space-y-1">
@@ -169,20 +133,20 @@ const Dashboard = () => {
                   
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">{project.phase}</span>
-                      <span className="font-medium">{project.progress}%</span>
+                      <span className="text-muted-foreground">{project.type}</span>
+                      <span className="font-medium">{getProgressPercentage(project.status)}%</span>
                     </div>
-                    <Progress value={project.progress} className="h-2" />
+                    <Progress value={getProgressPercentage(project.status)} className="h-2" />
                   </div>
                   
                   <div className="flex items-center justify-between text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <Calendar className="h-3 w-3" />
-                      {project.dueDate}
+                      {formatDate(project.due_date)}
                     </div>
                     <div className="flex items-center gap-1">
                       <Users className="h-3 w-3" />
-                      {project.team} team members
+                      Project Team
                     </div>
                   </div>
                 </div>
