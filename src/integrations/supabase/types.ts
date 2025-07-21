@@ -496,6 +496,7 @@ export type Database = {
           created_at: string
           description: string | null
           designer: string | null
+          designer_id: string | null
           due_date: string
           id: string
           name: string
@@ -509,6 +510,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           designer?: string | null
+          designer_id?: string | null
           due_date: string
           id?: string
           name: string
@@ -522,6 +524,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           designer?: string | null
+          designer_id?: string | null
           due_date?: string
           id?: string
           name?: string
@@ -530,7 +533,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "projects_designer_id_fkey"
+            columns: ["designer_id"]
+            isOneToOne: false
+            referencedRelation: "designer_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       version_files: {
         Row: {
@@ -578,7 +589,26 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_project_with_designer_details: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          project_id: string
+          project_name: string
+          client: string
+          designer_name: string
+          designer_id: string
+          designer_email: string
+          designer_type: string
+          designer_status: string
+          project_type: string
+          project_status: string
+          project_description: string
+          due_date: string
+          created_at: string
+          updated_at: string
+          user_id: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

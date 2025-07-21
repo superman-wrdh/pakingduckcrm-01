@@ -44,7 +44,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useDesignerProfiles, Designer } from "@/hooks/useDesignerProfiles";
-import { useProjects, Project as ProjectType } from "@/hooks/useProjects";
+import { useProjectsWithDesigners, ProjectWithDesigner } from "@/hooks/useProjectsWithDesigners";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -52,7 +52,7 @@ const ITEMS_PER_PAGE = 10;
 
 export default function DesignerManagement() {
   const { designers, loading, error, refetch } = useDesignerProfiles();
-  const { projects, loading: projectsLoading, refetch: refetchProjects } = useProjects();
+  const { projects, loading: projectsLoading, assignDesignerToProject, unassignDesignerFromProject, refetch: refetchProjects } = useProjectsWithDesigners();
   const { toast } = useToast();
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedDesigner, setSelectedDesigner] = useState<Designer | null>(null);
@@ -106,7 +106,7 @@ export default function DesignerManagement() {
       setSelectedDesigner(designer);
       // Get currently assigned projects for this designer
       const assignedProjects = projects
-        .filter(p => p.designer === designer.name)
+        .filter(p => p.designer?.id === designer.id)
         .map(p => p.id);
       setSelectedProjects(assignedProjects);
       setShowAssignDialog(true);
@@ -118,18 +118,18 @@ export default function DesignerManagement() {
     // Handle delete logic here
   };
 
-  const getDesignerProjects = (designerName: string) => {
-    return projects.filter(p => p.designer === designerName);
+  const getDesignerProjects = (designerId: string) => {
+    return projects.filter(p => p.designer?.id === designerId);
   };
 
-  const getCurrentProjects = (designerName: string) => {
-    return getDesignerProjects(designerName).filter(p => 
+  const getCurrentProjects = (designerId: string) => {
+    return getDesignerProjects(designerId).filter(p => 
       !['complete', 'delivering'].includes(p.status)
     );
   };
 
-  const getPastProjects = (designerName: string) => {
-    return getDesignerProjects(designerName).filter(p => 
+  const getPastProjects = (designerId: string) => {
+    return getDesignerProjects(designerId).filter(p => 
       p.status === 'complete'
     );
   };
@@ -153,34 +153,30 @@ export default function DesignerManagement() {
     try {
       // Get all available projects
       const availableProjects = getAvailableProjects();
+      let successCount = 0;
       
       // Update projects: remove designer from unselected projects, add designer to selected projects
       for (const project of availableProjects) {
         const shouldBeAssigned = selectedProjects.includes(project.id);
-        const currentlyAssigned = project.designer === selectedDesigner.name;
+        const currentlyAssigned = project.designer?.id === selectedDesigner.id;
         
         if (shouldBeAssigned && !currentlyAssigned) {
           // Assign designer to this project
-          await supabase
-            .from('projects')
-            .update({ designer: selectedDesigner.name })
-            .eq('id', project.id);
+          const success = await assignDesignerToProject(project.id, selectedDesigner.id);
+          if (success) successCount++;
         } else if (!shouldBeAssigned && currentlyAssigned) {
           // Remove designer from this project
-          await supabase
-            .from('projects')
-            .update({ designer: null })
-            .eq('id', project.id);
+          const success = await unassignDesignerFromProject(project.id);
+          if (success) successCount++;
         }
       }
 
-      // Refresh projects data
-      await refetchProjects();
-      
-      toast({
-        title: "Tasks Assigned",
-        description: `Projects successfully assigned to ${selectedDesigner.name}. They will now appear in their My Tasks.`,
-      });
+      if (successCount > 0) {
+        toast({
+          title: "Tasks Assigned",
+          description: `Projects successfully assigned to ${selectedDesigner.name}. They will now appear in their My Tasks.`,
+        });
+      }
       
       setShowAssignDialog(false);
       setSelectedDesigner(null);
@@ -469,9 +465,9 @@ export default function DesignerManagement() {
               <div className="space-y-4">
                 <div>
                    <h4 className="font-medium text-lg mb-3">My Tasks</h4>
-                   {getCurrentProjects(selectedDesigner.name).length > 0 ? (
+                   {getCurrentProjects(selectedDesigner.id).length > 0 ? (
                      <div className="space-y-2">
-                       {getCurrentProjects(selectedDesigner.name).map((project) => (
+                       {getCurrentProjects(selectedDesigner.id).map((project) => (
                         <div key={project.id} className="p-3 border rounded-lg">
                           <div className="flex items-start justify-between">
                             <div>
@@ -493,9 +489,9 @@ export default function DesignerManagement() {
 
                 <div>
                    <h4 className="font-medium text-lg mb-3">Past Projects</h4>
-                   {getPastProjects(selectedDesigner.name).length > 0 ? (
+                   {getPastProjects(selectedDesigner.id).length > 0 ? (
                      <div className="space-y-2">
-                       {getPastProjects(selectedDesigner.name).map((project) => (
+                       {getPastProjects(selectedDesigner.id).map((project) => (
                         <div key={project.id} className="p-3 border rounded-lg bg-muted/30">
                           <div className="flex items-start justify-between">
                             <div>
