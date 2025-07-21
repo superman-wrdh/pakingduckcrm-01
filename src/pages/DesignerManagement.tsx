@@ -178,8 +178,8 @@ export default function DesignerManagement() {
       await refetchProjects();
       
       toast({
-        title: "Assignment Updated",
-        description: `Projects successfully assigned to ${selectedDesigner.name}`,
+        title: "Tasks Assigned",
+        description: `Projects successfully assigned to ${selectedDesigner.name}. They will now appear in their My Tasks.`,
       });
       
       setShowAssignDialog(false);
@@ -468,7 +468,7 @@ export default function DesignerManagement() {
 
               <div className="space-y-4">
                 <div>
-                   <h4 className="font-medium text-lg mb-3">Current Projects</h4>
+                   <h4 className="font-medium text-lg mb-3">My Tasks</h4>
                    {getCurrentProjects(selectedDesigner.name).length > 0 ? (
                      <div className="space-y-2">
                        {getCurrentProjects(selectedDesigner.name).map((project) => (
@@ -486,9 +486,9 @@ export default function DesignerManagement() {
                         </div>
                       ))}
                     </div>
-                  ) : (
-                    <p className="text-muted-foreground">No current projects assigned</p>
-                  )}
+                   ) : (
+                     <p className="text-muted-foreground">No tasks assigned</p>
+                   )}
                 </div>
 
                 <div>
