@@ -461,7 +461,7 @@ const ProjectDetailsView = ({ project }: { project: any }) => {
               </div>
             ))}
           </div>
-          <Progress value={(project.progress / 5) * 100} className="w-full" />
+          <Progress value={20} className="w-full" />
         </div>
 
         {/* Project Info and Manager Section */}
@@ -477,20 +477,20 @@ const ProjectDetailsView = ({ project }: { project: any }) => {
                 <span className="font-medium">{project.client}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Designer:</span>
-                <span className="font-medium">{project.designer}</span>
+                <span className="text-muted-foreground">Type:</span>
+                <span className="font-medium">{project.type}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Status:</span>
                 <Badge className={getStatusColor(project.status)}>{project.status}</Badge>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Start Date:</span>
-                <span className="font-medium">{project.startDate}</span>
+                <span className="text-muted-foreground">Created:</span>
+                <span className="font-medium">{new Date(project.created_at).toLocaleDateString()}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Deadline:</span>
-                <span className="font-medium">{project.deadline}</span>
+                <span className="text-muted-foreground">Due Date:</span>
+                <span className="font-medium">{new Date(project.due_date).toLocaleDateString()}</span>
               </div>
             </CardContent>
           </Card>
@@ -502,16 +502,16 @@ const ProjectDetailsView = ({ project }: { project: any }) => {
             </CardHeader>
             <CardContent>
               <div className="flex items-center space-x-3">
-                <Avatar className="h-12 w-12">
-                  <AvatarImage src="" />
-                  <AvatarFallback>
-                    {project.projectManager.split(' ').map((n: string) => n[0]).join('')}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="font-medium">{project.projectManager}</p>
-                  <p className="text-sm text-muted-foreground">{project.email}</p>
-                </div>
+                 <Avatar className="h-12 w-12">
+                   <AvatarImage src="" />
+                   <AvatarFallback>
+                     {project.projectManager ? project.projectManager.split(' ').map((n: string) => n[0]).join('') : 'PM'}
+                   </AvatarFallback>
+                 </Avatar>
+                 <div>
+                   <p className="font-medium">{project.projectManager || 'Project Manager'}</p>
+                   <p className="text-sm text-muted-foreground">{project.email || 'No email set'}</p>
+                 </div>
               </div>
             </CardContent>
           </Card>
@@ -520,107 +520,16 @@ const ProjectDetailsView = ({ project }: { project: any }) => {
         {/* Design History Section */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold">Design History</h3>
-          <Tabs defaultValue="gallery" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="gallery">Gallery View</TabsTrigger>
-              <TabsTrigger value="list">List View</TabsTrigger>
-            </TabsList>
-            <TabsContent value="gallery" className="space-y-4">
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {project.designs?.map((design: any) => (
-                  <Card key={design.id} className="overflow-hidden">
-                    <div className="aspect-square bg-gray-100 flex items-center justify-center">
-                      <img 
-                        src={design.image} 
-                        alt={design.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <CardContent className="p-3">
-                      <p className="font-medium text-sm">{design.name}</p>
-                      <p className="text-xs text-muted-foreground">{design.version}</p>
-                      <p className="text-xs text-muted-foreground">{design.date}</p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </TabsContent>
-            <TabsContent value="list" className="space-y-2">
-              {project.designs?.map((design: any) => (
-                <Card key={design.id}>
-                  <CardContent className="flex items-center space-x-4 p-4">
-                    <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
-                      <img 
-                        src={design.image} 
-                        alt={design.name}
-                        className="w-full h-full object-cover rounded-lg"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium">{design.name}</p>
-                      <p className="text-sm text-muted-foreground">Version: {design.version}</p>
-                      <p className="text-sm text-muted-foreground">Date: {design.date}</p>
-                    </div>
-                    <Button variant="outline" size="sm">
-                      <Eye className="h-4 w-4 mr-2" />
-                      View
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </TabsContent>
-          </Tabs>
+          <div className="text-sm text-muted-foreground p-4 bg-muted/20 rounded-lg">
+            No designs uploaded yet. Design files will appear here once uploaded.
+          </div>
         </div>
 
         {/* Attachments Section */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold">Attachments</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <Card className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-sm">Contract</p>
-                  <p className="text-xs text-muted-foreground">{project.attachments.contract}</p>
-                </div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => handleDownload(project.attachments.contract)}
-                >
-                  <Download className="h-4 w-4" />
-                </Button>
-              </div>
-            </Card>
-            <Card className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-sm">RFQ</p>
-                  <p className="text-xs text-muted-foreground">{project.attachments.rfq}</p>
-                </div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => handleDownload(project.attachments.rfq)}
-                >
-                  <Download className="h-4 w-4" />
-                </Button>
-              </div>
-            </Card>
-            <Card className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-sm">Invoice</p>
-                  <p className="text-xs text-muted-foreground">{project.attachments.invoice}</p>
-                </div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => handleDownload(project.attachments.invoice)}
-                >
-                  <Download className="h-4 w-4" />
-                </Button>
-              </div>
-            </Card>
+          <div className="text-sm text-muted-foreground p-4 bg-muted/20 rounded-lg">
+            No attachments uploaded yet. Project files will appear here once uploaded.
           </div>
         </div>
       </div>
