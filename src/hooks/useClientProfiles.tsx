@@ -50,7 +50,7 @@ export function useClientProfiles() {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('client_profiles')
+        .from('client_profiles' as any)
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -64,7 +64,7 @@ export function useClientProfiles() {
         return;
       }
 
-      const mappedClients = data?.map(mapProfileToClient) || [];
+      const mappedClients = (data as any)?.map(mapProfileToClient) || [];
       setClients(mappedClients);
     } catch (error) {
       console.error('Error fetching clients:', error);
@@ -82,7 +82,7 @@ export function useClientProfiles() {
   const addClient = async (clientData: Omit<ClientProfile, 'id' | 'created_at' | 'updated_at'>) => {
     try {
       const { data, error } = await supabase
-        .from('client_profiles')
+        .from('client_profiles' as any)
         .insert([clientData])
         .select()
         .single();
@@ -97,7 +97,7 @@ export function useClientProfiles() {
         return false;
       }
 
-      const newClient = mapProfileToClient(data);
+      const newClient = mapProfileToClient(data as any);
       setClients(prev => [newClient, ...prev]);
       
       toast({
@@ -120,7 +120,7 @@ export function useClientProfiles() {
   const updateClient = async (clientId: string, updates: Partial<ClientProfile>) => {
     try {
       const { data, error } = await supabase
-        .from('client_profiles')
+        .from('client_profiles' as any)
         .update(updates)
         .eq('id', clientId)
         .select()
@@ -136,7 +136,7 @@ export function useClientProfiles() {
         return false;
       }
 
-      const updatedClient = mapProfileToClient(data);
+      const updatedClient = mapProfileToClient(data as any);
       setClients(prev => prev.map(client => 
         client.id === clientId ? updatedClient : client
       ));
@@ -161,7 +161,7 @@ export function useClientProfiles() {
   const deleteClient = async (clientId: string) => {
     try {
       const { error } = await supabase
-        .from('client_profiles')
+        .from('client_profiles' as any)
         .delete()
         .eq('id', clientId);
 

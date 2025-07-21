@@ -11,20 +11,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useToast } from "@/hooks/use-toast";
 import { Search, Plus, UserPlus, Building2, User, Award, Users2, Package, Activity, Link, Eye, Settings, Trash2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Calendar, Clock, CheckCircle } from "lucide-react";
-
-interface Client {
-  id: number;
-  companyName: string;
-  contact: string;
-  email: string;
-  tier: string;
-  projectManager: string;
-  numberOfOrders: number;
-  activityStatus: 'Active' | 'Inactive' | 'Pending';
-  affiliate: string;
-}
+import { useClientProfiles, Client } from "@/hooks/useClientProfiles";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Project {
   id: number;
@@ -37,222 +26,23 @@ interface Project {
 }
 
 const ClientsManagement = () => {
-  const { toast } = useToast();
+  const { clients, loading, addClient, updateClient, deleteClient } = useClientProfiles();
+  const { user } = useAuth();
+  
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(12);
-  const [clients, setClients] = useState<Client[]>([
-    {
-      id: 1,
-      companyName: "Bean & Brew Co.",
-      contact: "John Smith",
-      email: "john@beanandbrewco.com",
-      tier: "Premium",
-      projectManager: "Alice Johnson",
-      numberOfOrders: 24,
-      activityStatus: "Active",
-      affiliate: "Tech Partners"
-    },
-    {
-      id: 2,
-      companyName: "Zen Tea House",
-      contact: "Sarah Lee",
-      email: "sarah@zenteahouse.com",
-      tier: "Standard",
-      projectManager: "Bob Wilson",
-      numberOfOrders: 12,
-      activityStatus: "Active",
-      affiliate: "Direct"
-    },
-    {
-      id: 3,
-      companyName: "Energy Boost Inc.",
-      contact: "Mike Chen",
-      email: "mike@energyboost.com",
-      tier: "Enterprise",
-      projectManager: "Carol Davis",
-      numberOfOrders: 45,
-      activityStatus: "Inactive",
-      affiliate: "Channel Partners"
-    },
-    {
-      id: 4,
-      companyName: "TechFlow Solutions",
-      contact: "David Zhang",
-      email: "david@techflow.com",
-      tier: "Enterprise",
-      projectManager: "Emma Thompson",
-      numberOfOrders: 67,
-      activityStatus: "Active",
-      affiliate: "Tech Partners"
-    },
-    {
-      id: 5,
-      companyName: "Creative Studios Ltd",
-      contact: "Maria Garcia",
-      email: "maria@creativestudios.com",
-      tier: "Premium",
-      projectManager: "James Wilson",
-      numberOfOrders: 33,
-      activityStatus: "Active",
-      affiliate: "Design Partners"
-    },
-    {
-      id: 6,
-      companyName: "Global Trade Corp",
-      contact: "Robert Kim",
-      email: "robert@globaltrade.com",
-      tier: "Standard",
-      projectManager: "Lisa Chen",
-      numberOfOrders: 18,
-      activityStatus: "Pending",
-      affiliate: "Direct"
-    },
-    {
-      id: 7,
-      companyName: "Innovation Labs",
-      contact: "Amanda White",
-      email: "amanda@innovationlabs.com",
-      tier: "Enterprise",
-      projectManager: "Tom Anderson",
-      numberOfOrders: 89,
-      activityStatus: "Active",
-      affiliate: "Tech Partners"
-    },
-    {
-      id: 8,
-      companyName: "Startup Hub",
-      contact: "Chris Brown",
-      email: "chris@startuphub.com",
-      tier: "Standard",
-      projectManager: "Sophie Davis",
-      numberOfOrders: 7,
-      activityStatus: "Active",
-      affiliate: "Startup Network"
-    },
-    {
-      id: 9,
-      companyName: "Digital Marketing Pro",
-      contact: "Jennifer Lee",
-      email: "jennifer@digitalmarketing.com",
-      tier: "Premium",
-      projectManager: "Mark Johnson",
-      numberOfOrders: 41,
-      activityStatus: "Inactive",
-      affiliate: "Marketing Partners"
-    },
-    {
-      id: 10,
-      companyName: "E-commerce Elite",
-      contact: "Michael Taylor",
-      email: "michael@ecommerceelite.com",
-      tier: "Enterprise",
-      projectManager: "Rachel Green",
-      numberOfOrders: 76,
-      activityStatus: "Active",
-      affiliate: "E-commerce Network"
-    },
-    {
-      id: 11,
-      companyName: "Finance First",
-      contact: "Sarah Johnson",
-      email: "sarah@financefirst.com",
-      tier: "Premium",
-      projectManager: "Alex Martinez",
-      numberOfOrders: 28,
-      activityStatus: "Active",
-      affiliate: "Finance Partners"
-    },
-    {
-      id: 12,
-      companyName: "Health Tech Solutions",
-      contact: "Dr. Kevin Wong",
-      email: "kevin@healthtech.com",
-      tier: "Enterprise",
-      projectManager: "Emily Rodriguez",
-      numberOfOrders: 52,
-      activityStatus: "Active",
-      affiliate: "Healthcare Network"
-    },
-    {
-      id: 13,
-      companyName: "Real Estate Pro",
-      contact: "Linda Thompson",
-      email: "linda@realestatepro.com",
-      tier: "Standard",
-      projectManager: "Ryan Clark",
-      numberOfOrders: 15,
-      activityStatus: "Pending",
-      affiliate: "Real Estate Partners"
-    },
-    {
-      id: 14,
-      companyName: "Education Excellence",
-      contact: "Professor Smith",
-      email: "smith@educationexcellence.com",
-      tier: "Premium",
-      projectManager: "Jessica Wang",
-      numberOfOrders: 36,
-      activityStatus: "Active",
-      affiliate: "Education Network"
-    },
-    {
-      id: 15,
-      companyName: "Travel Adventures",
-      contact: "Marco Rossi",
-      email: "marco@traveladventures.com",
-      tier: "Standard",
-      projectManager: "Kelly Brown",
-      numberOfOrders: 22,
-      activityStatus: "Active",
-      affiliate: "Travel Partners"
-    },
-    {
-      id: 16,
-      companyName: "Food & Beverage Co",
-      contact: "Chef Antoine",
-      email: "antoine@foodbeverage.com",
-      tier: "Premium",
-      projectManager: "Nicole Lee",
-      numberOfOrders: 44,
-      activityStatus: "Inactive",
-      affiliate: "F&B Network"
-    },
-    {
-      id: 17,
-      companyName: "Sports Management",
-      contact: "Coach Williams",
-      email: "williams@sportsmanagement.com",
-      tier: "Enterprise",
-      projectManager: "Danny Kim",
-      numberOfOrders: 63,
-      activityStatus: "Active",
-      affiliate: "Sports Partners"
-    },
-    {
-      id: 18,
-      companyName: "Fashion Forward",
-      contact: "Isabella Chen",
-      email: "isabella@fashionforward.com",
-      tier: "Premium",
-      projectManager: "Oliver Jones",
-      numberOfOrders: 31,
-      activityStatus: "Active",
-      affiliate: "Fashion Network"
-    }
-  ]);
 
   const [newClient, setNewClient] = useState({
-    companyName: "",
-    contact: "",
+    company_name: "",
+    contact_name: "",
     email: "",
-    tier: "",
-    projectManager: "",
-    affiliate: ""
+    phone: "",
+    user_id: user?.id || "",
   });
 
   // Mock projects data for clients
-  const clientProjects: { [key: number]: Project[] } = {
+  const clientProjects: { [key: string]: Project[] } = {
     1: [
       { id: 1, name: "Organic Tea Package Design", status: 'ongoing', startDate: '2024-01-15', description: 'Complete packaging design for organic tea collection', progress: 75 },
       { id: 2, name: "Website Redesign", status: 'completed', startDate: '2023-10-01', endDate: '2023-12-15', description: 'Full website redesign and development', progress: 100 },
@@ -290,38 +80,31 @@ const ClientsManagement = () => {
   const startItem = totalItems > 0 ? startIndex + 1 : 0;
   const endItem = Math.min(endIndex, totalItems);
 
-  const handleAddClient = () => {
-    if (!newClient.companyName || !newClient.contact || !newClient.email) {
-      toast({
-        title: "Error",
-        description: "Please fill in all required fields",
-        variant: "destructive"
-      });
+  const handleAddClient = async () => {
+    if (!newClient.company_name || !newClient.contact_name || !newClient.email) {
       return;
     }
 
-    const client: Client = {
-      id: clients.length + 1,
+    if (!user?.id) {
+      return;
+    }
+
+    const success = await addClient({
       ...newClient,
-      numberOfOrders: 0,
-      activityStatus: "Pending"
-    };
-
-    setClients([...clients, client]);
-    setNewClient({
-      companyName: "",
-      contact: "",
-      email: "",
-      tier: "",
-      projectManager: "",
-      affiliate: ""
+      user_id: user.id,
+      number_of_projects: 0
     });
-    setIsAddDialogOpen(false);
 
-    toast({
-      title: "Client Added",
-      description: `${newClient.companyName} has been added successfully`
-    });
+    if (success) {
+      setNewClient({
+        company_name: "",
+        contact_name: "",
+        email: "",
+        phone: "",
+        user_id: user?.id || "",
+      });
+      setIsAddDialogOpen(false);
+    }
   };
 
   const handleViewProjects = (client: Client) => {
@@ -334,34 +117,25 @@ const ClientsManagement = () => {
     setIsEditDialogOpen(true);
   };
 
-  const handleEditClient = () => {
+  const handleEditClient = async () => {
     if (!editingClient?.companyName || !editingClient?.contact || !editingClient?.email) {
-      toast({
-        title: "Error",
-        description: "Please fill in all required fields",
-        variant: "destructive"
-      });
       return;
     }
 
-    setClients(clients.map(client => 
-      client.id === editingClient.id ? editingClient : client
-    ));
-    setIsEditDialogOpen(false);
-    setEditingClient(null);
-
-    toast({
-      title: "Client Updated",
-      description: `${editingClient.companyName} has been updated successfully`
+    const success = await updateClient(editingClient.id, {
+      company_name: editingClient.companyName,
+      contact_name: editingClient.contact,
+      email: editingClient.email,
     });
+
+    if (success) {
+      setIsEditDialogOpen(false);
+      setEditingClient(null);
+    }
   };
 
-  const handleDeleteClient = (clientId: number) => {
-    setClients(clients.filter(client => client.id !== clientId));
-    toast({
-      title: "Client Deleted",
-      description: "Client has been deleted successfully",
-    });
+  const handleDeleteClient = async (clientId: string) => {
+    await deleteClient(clientId);
   };
 
   const getInitials = (name: string) => {
@@ -395,17 +169,57 @@ const ClientsManagement = () => {
     }
   };
 
-  const getClientProjects = (clientId: number) => {
+  const getClientProjects = (clientId: string) => {
     return clientProjects[clientId] || [];
   };
 
-  const getOngoingProjects = (clientId: number) => {
+  const getOngoingProjects = (clientId: string) => {
     return getClientProjects(clientId).filter(p => p.status === 'ongoing' || p.status === 'on-hold');
   };
 
-  const getCompletedProjects = (clientId: number) => {
+  const getCompletedProjects = (clientId: string) => {
     return getClientProjects(clientId).filter(p => p.status === 'completed');
   };
+
+  if (loading) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold">Clients Management</h1>
+            <p className="text-muted-foreground mt-1">Loading your clients...</p>
+          </div>
+        </div>
+        <Card>
+          <CardContent className="p-8">
+            <div className="flex items-center justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold">Clients Management</h1>
+            <p className="text-muted-foreground mt-1">Please sign in to manage your clients</p>
+          </div>
+        </div>
+        <Card>
+          <CardContent className="p-8">
+            <div className="text-center">
+              <p className="text-muted-foreground">You need to be signed in to access this page.</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -435,8 +249,8 @@ const ClientsManagement = () => {
                   <Label htmlFor="companyName">Company Name *</Label>
                   <Input
                     id="companyName"
-                    value={newClient.companyName}
-                    onChange={(e) => setNewClient({...newClient, companyName: e.target.value})}
+                    value={newClient.company_name}
+                    onChange={(e) => setNewClient({...newClient, company_name: e.target.value})}
                     placeholder="Enter company name"
                   />
                 </div>
@@ -444,8 +258,8 @@ const ClientsManagement = () => {
                   <Label htmlFor="contact">Contact Person *</Label>
                   <Input
                     id="contact"
-                    value={newClient.contact}
-                    onChange={(e) => setNewClient({...newClient, contact: e.target.value})}
+                    value={newClient.contact_name}
+                    onChange={(e) => setNewClient({...newClient, contact_name: e.target.value})}
                     placeholder="Enter contact name"
                   />
                 </div>
@@ -460,37 +274,13 @@ const ClientsManagement = () => {
                   placeholder="Enter email address"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="tier">Tier</Label>
-                  <Select value={newClient.tier} onValueChange={(value) => setNewClient({...newClient, tier: value})}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select tier" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Standard">Standard</SelectItem>
-                      <SelectItem value="Premium">Premium</SelectItem>
-                      <SelectItem value="Enterprise">Enterprise</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="projectManager">Project Manager</Label>
-                  <Input
-                    id="projectManager"
-                    value={newClient.projectManager}
-                    onChange={(e) => setNewClient({...newClient, projectManager: e.target.value})}
-                    placeholder="Assign project manager"
-                  />
-                </div>
-              </div>
               <div className="space-y-2">
-                <Label htmlFor="affiliate">Affiliate</Label>
+                <Label htmlFor="phone">Phone</Label>
                 <Input
-                  id="affiliate"
-                  value={newClient.affiliate}
-                  onChange={(e) => setNewClient({...newClient, affiliate: e.target.value})}
-                  placeholder="Enter affiliate information"
+                  id="phone"
+                  value={newClient.phone}
+                  onChange={(e) => setNewClient({...newClient, phone: e.target.value})}
+                  placeholder="Enter phone number"
                 />
               </div>
             </div>
