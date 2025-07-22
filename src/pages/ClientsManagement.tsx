@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Search, Plus, UserPlus, Building2, User, Award, Users2, Package, Activity, Link, Eye, Settings, Trash2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Calendar, Clock, CheckCircle } from "lucide-react";
 import { useClientProfiles, Client } from "@/hooks/useClientProfiles";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Project {
   id: number;
