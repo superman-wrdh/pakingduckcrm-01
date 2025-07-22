@@ -15,9 +15,9 @@ import {
 const Index = () => {
   const { user } = useAuth();
 
-  // Redirect to dashboard if already logged in
+  // Redirect to CRM dashboard if already logged in
   if (user) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/crm/dashboard" replace />;
   }
 
   const features = [
@@ -101,11 +101,18 @@ const Index = () => {
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </Link>
-            <Link to="/signin">
-              <Button size="lg" variant="outline" className="min-w-[200px]">
-                Client Portal
-              </Button>
-            </Link>
+            <div className="flex gap-2">
+              <Link to="/crm/dashboard">
+                <Button size="lg" variant="outline" className="min-w-[140px]">
+                  CRM Portal
+                </Button>
+              </Link>
+              <Link to="/designer/dashboard">
+                <Button size="lg" variant="outline" className="min-w-[140px]">
+                  Designer Portal
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </section>

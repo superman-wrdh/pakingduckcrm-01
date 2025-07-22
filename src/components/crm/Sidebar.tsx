@@ -41,31 +41,31 @@ import {
 import { cn } from "@/lib/utils";
 
 const mainItems = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "My Projects", url: "/projects", icon: FolderOpen },
-  { title: "My Tasks", url: "/my-tasks", icon: CheckSquare },
-  { title: "Activity", url: "/activity", icon: Activity },
+  { title: "Dashboard", url: "/crm/dashboard", icon: LayoutDashboard },
+  { title: "My Projects", url: "/crm/projects", icon: FolderOpen },
+  { title: "My Tasks", url: "/crm/my-tasks", icon: CheckSquare },
+  { title: "Activity", url: "/crm/activity", icon: Activity },
 ];
 
 const communicationItems = [
-  { title: "Chat", url: "/chat", icon: MessageCircle },
-  { title: "Duck AI", url: "/duck-ai", icon: MessageCircle },
-  { title: "Community", url: "/community", icon: Users },
+  { title: "Chat", url: "/crm/chat", icon: MessageCircle },
+  { title: "Duck AI", url: "/crm/duck-ai", icon: MessageCircle },
+  { title: "Community", url: "/crm/community", icon: Users },
 ];
 
 const supportItems = [
-  { title: "How-To Guides", url: "/how-to", icon: BookOpen },
-  { title: "Help Center", url: "/guide", icon: HelpCircle },
-  { title: "RFQ", url: "/rfq", icon: MessageSquare },
+  { title: "How-To Guides", url: "/crm/how-to", icon: BookOpen },
+  { title: "Help Center", url: "/crm/guide", icon: HelpCircle },
+  { title: "RFQ", url: "/crm/rfq", icon: MessageSquare },
 ];
 
 const accountItems = [
-  { title: "Profile", url: "/profile", icon: User },
-  { title: "Payment", url: "/payment", icon: CreditCard },
-  { title: "Invoice", url: "/invoice", icon: Receipt },
-  { title: "Statistics", url: "/statistics", icon: BarChart3 },
-  { title: "Notifications", url: "/notifications", icon: Bell },
-  { title: "Settings", url: "/settings", icon: Settings },
+  { title: "Profile", url: "/crm/profile", icon: User },
+  { title: "Payment", url: "/crm/payment", icon: CreditCard },
+  { title: "Invoice", url: "/crm/invoice", icon: Receipt },
+  { title: "Statistics", url: "/crm/statistics", icon: BarChart3 },
+  { title: "Notifications", url: "/crm/notifications", icon: Bell },
+  { title: "Settings", url: "/crm/settings", icon: Settings },
 ];
 
 interface SidebarSectionProps {

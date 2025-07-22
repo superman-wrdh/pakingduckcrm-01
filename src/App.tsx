@@ -47,150 +47,175 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
-            <Route path="/dashboard" element={
+            
+            {/* CRM Portal Routes */}
+            <Route path="/crm/dashboard" element={
               <ProtectedRoute>
                 <CRMLayout>
                   <Dashboard />
                 </CRMLayout>
               </ProtectedRoute>
             } />
-            <Route path="/community" element={
+            <Route path="/crm/projects" element={
               <ProtectedRoute>
                 <CRMLayout>
-                  <Community />
+                  <Projects />
                 </CRMLayout>
               </ProtectedRoute>
             } />
-            <Route path="/how-to" element={
-              <ProtectedRoute>
-                <CRMLayout>
-                  <HowTo />
-                </CRMLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/guide" element={
-              <ProtectedRoute>
-                <CRMLayout>
-                  <Guide />
-                </CRMLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/my-tasks" element={
+            <Route path="/crm/my-tasks" element={
               <ProtectedRoute>
                 <CRMLayout>
                   <MyTasks />
                 </CRMLayout>
               </ProtectedRoute>
             } />
-            <Route path="/activity" element={
+            <Route path="/crm/activity" element={
               <ProtectedRoute>
                 <CRMLayout>
                   <Activity />
                 </CRMLayout>
               </ProtectedRoute>
             } />
-            <Route path="/notifications" element={
-              <ProtectedRoute>
-                <CRMLayout>
-                  <Notifications />
-                </CRMLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/projects" element={
-              <ProtectedRoute>
-                <CRMLayout>
-                  <Projects />
-                </CRMLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/duck-ai" element={
-              <ProtectedRoute>
-                <CRMLayout>
-                  <DuckAI />
-                </CRMLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/profile" element={
-              <ProtectedRoute>
-                <CRMLayout>
-                  <Profile />
-                </CRMLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/chat" element={
+            <Route path="/crm/chat" element={
               <ProtectedRoute>
                 <CRMLayout>
                   <Chat />
                 </CRMLayout>
               </ProtectedRoute>
             } />
-            <Route path="/payment" element={
+            <Route path="/crm/community" element={
               <ProtectedRoute>
                 <CRMLayout>
-                  <Payment />
+                  <Community />
                 </CRMLayout>
               </ProtectedRoute>
             } />
-            <Route path="/statistics" element={
+            <Route path="/crm/duck-ai" element={
               <ProtectedRoute>
                 <CRMLayout>
-                  <Statistics />
+                  <DuckAI />
                 </CRMLayout>
               </ProtectedRoute>
             } />
-            <Route path="/settings" element={
+            <Route path="/crm/how-to" element={
               <ProtectedRoute>
                 <CRMLayout>
-                  <Settings />
+                  <HowTo />
                 </CRMLayout>
               </ProtectedRoute>
             } />
-            <Route path="/updated-settings" element={
+            <Route path="/crm/guide" element={
               <ProtectedRoute>
                 <CRMLayout>
-                  <UpdatedSettings />
+                  <Guide />
                 </CRMLayout>
               </ProtectedRoute>
             } />
-            <Route path="/clients-management" element={
-              <ProtectedRoute>
-                <CRMLayout>
-                  <ClientsManagement />
-                </CRMLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/projects-management" element={
-              <ProtectedRoute>
-                <CRMLayout>
-                  <Projects />
-                </CRMLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/projects-management/design" element={
-              <ProtectedRoute>
-                <CRMLayout>
-                  <Contract />
-                </CRMLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/projects-management/manufacturing" element={
+            <Route path="/crm/rfq" element={
               <ProtectedRoute>
                 <CRMLayout>
                   <RFQ />
                 </CRMLayout>
               </ProtectedRoute>
             } />
-            <Route path="/projects-management/completed" element={
+            <Route path="/crm/profile" element={
+              <ProtectedRoute>
+                <CRMLayout>
+                  <Profile />
+                </CRMLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/crm/payment" element={
+              <ProtectedRoute>
+                <CRMLayout>
+                  <Payment />
+                </CRMLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/crm/invoice" element={
               <ProtectedRoute>
                 <CRMLayout>
                   <Invoice />
                 </CRMLayout>
               </ProtectedRoute>
             } />
-            <Route path="/designer-management" element={
+            <Route path="/crm/statistics" element={
+              <ProtectedRoute>
+                <CRMLayout>
+                  <Statistics />
+                </CRMLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/crm/notifications" element={
+              <ProtectedRoute>
+                <CRMLayout>
+                  <Notifications />
+                </CRMLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/crm/settings" element={
+              <ProtectedRoute>
+                <CRMLayout>
+                  <Settings />
+                </CRMLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/crm/updated-settings" element={
+              <ProtectedRoute>
+                <CRMLayout>
+                  <UpdatedSettings />
+                </CRMLayout>
+              </ProtectedRoute>
+            } />
+
+            {/* Designer Portal Routes */}
+            <Route path="/designer/dashboard" element={
+              <ProtectedRoute>
+                <CRMLayout>
+                  <Dashboard />
+                </CRMLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/designer/clients-management" element={
+              <ProtectedRoute>
+                <CRMLayout>
+                  <ClientsManagement />
+                </CRMLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/designer/designer-management" element={
               <ProtectedRoute>
                 <CRMLayout>
                   <DesignerManagement />
+                </CRMLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/designer/projects-management" element={
+              <ProtectedRoute>
+                <CRMLayout>
+                  <Projects />
+                </CRMLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/designer/projects-management/design" element={
+              <ProtectedRoute>
+                <CRMLayout>
+                  <Contract />
+                </CRMLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/designer/projects-management/manufacturing" element={
+              <ProtectedRoute>
+                <CRMLayout>
+                  <RFQ />
+                </CRMLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/designer/projects-management/completed" element={
+              <ProtectedRoute>
+                <CRMLayout>
+                  <Invoice />
                 </CRMLayout>
               </ProtectedRoute>
             } />
