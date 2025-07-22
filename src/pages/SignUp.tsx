@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 
 const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -62,7 +62,11 @@ const SignUp = () => {
 
     setIsLoading(true);
     
-    const { error } = await signUp(formData.email, password);
+    const { error } = await signUp(formData.email, password, {
+      first_name: formData.firstName,
+      last_name: formData.lastName,
+      company: formData.company
+    });
     
     if (error) {
       toast({
