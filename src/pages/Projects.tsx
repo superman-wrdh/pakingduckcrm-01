@@ -15,18 +15,22 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Plus, Eye, UserPlus, Trash2, Download, CheckCircle2, Calendar, User, Image } from "lucide-react";
 import { useState } from "react";
-import { useProjects } from "@/hooks/useProjects";
+import { useProjectsWithDesigners } from "@/hooks/useProjectsWithDesigners";
+import { useDesignerProfiles } from "@/hooks/useDesignerProfiles";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
 const Projects = () => {
-  const { projects, loading, getProjectStats, getStatusColor } = useProjects();
+  const { projects, loading, getProjectStats, getStatusColor, assignDesignerToProject, unassignDesignerFromProject } = useProjectsWithDesigners();
+  const { designers } = useDesignerProfiles();
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedClient, setSelectedClient] = useState("");
   const [selectedDesigner, setSelectedDesigner] = useState("");
   const [selectedProject, setSelectedProject] = useState<any>(null);
   const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false);
+  const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
+  const [projectToAssign, setProjectToAssign] = useState<any>(null);
   const [newProjectForm, setNewProjectForm] = useState({
     name: "",
     client: "",
@@ -97,14 +101,20 @@ const Projects = () => {
     "Print Design"
   ];
 
-  const designerOptions = [
-    "John Smith",
-    "Sarah Johnson", 
-    "Mike Chen",
-    "Lisa Wang",
-    "David Brown",
-    "Emma Wilson"
-  ];
+  const handleAssignDesigner = async (designerId: string) => {
+    if (!projectToAssign) return;
+    
+    const success = await assignDesignerToProject(projectToAssign.id, designerId);
+    if (success) {
+      setIsAssignDialogOpen(false);
+      setProjectToAssign(null);
+    }
+  };
+
+  const handleUnassignDesigner = async (projectId: string) => {
+    const success = await unassignDesignerFromProject(projectId);
+    // Refresh handled by the hook
+  };
 
   const clients = [...new Set(projects.map(p => p.client))];
   const stats = getProjectStats();
@@ -194,9 +204,9 @@ const Projects = () => {
                       <SelectValue placeholder="Select designer" />
                     </SelectTrigger>
                     <SelectContent>
-                      {designerOptions.map((designer) => (
-                        <SelectItem key={designer} value={designer}>
-                          {designer}
+                      {designers.map((designer) => (
+                        <SelectItem key={designer.id} value={designer.name || 'Unknown'}>
+                          {designer.name || 'Unknown Designer'}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -324,7 +334,23 @@ const Projects = () => {
                   <TableRow key={project.id} className="hover:bg-muted/50">
                     <TableCell className="font-medium">{project.name}</TableCell>
                     <TableCell>{project.client}</TableCell>
-                    <TableCell>{project.designer || 'Not assigned'}</TableCell>
+                     <TableCell>
+                       {project.designer ? (
+                         <div className="flex items-center gap-2">
+                           <span>{project.designer.name}</span>
+                           <Button 
+                             variant="ghost" 
+                             size="sm"
+                             onClick={() => handleUnassignDesigner(project.id)}
+                             className="h-4 w-4 p-0 text-muted-foreground hover:text-foreground"
+                           >
+                             ×
+                           </Button>
+                         </div>
+                       ) : (
+                         'Not assigned'
+                       )}
+                     </TableCell>
                     <TableCell>{project.type}</TableCell>
                     <TableCell>
                       <Badge className={getStatusColor(project.status)}>
@@ -348,9 +374,41 @@ const Projects = () => {
                             <ProjectDetailsView project={selectedProject} />
                           </SheetContent>
                         </Sheet>
-                        <Button variant="outline" size="sm" className="h-8 w-8 p-0">
-                          <UserPlus className="h-4 w-4" />
-                        </Button>
+                        <Dialog open={isAssignDialogOpen} onOpenChange={setIsAssignDialogOpen}>
+                          <DialogTrigger asChild>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="h-8 w-8 p-0"
+                              onClick={() => setProjectToAssign(project)}
+                            >
+                              <UserPlus className="h-4 w-4" />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Assign Designer</DialogTitle>
+                              <DialogDescription>
+                                Select a designer to assign to "{projectToAssign?.name}"
+                              </DialogDescription>
+                            </DialogHeader>
+                            <div className="grid gap-4 py-4">
+                              {designers.map((designer) => (
+                                <Button
+                                  key={designer.id}
+                                  variant="outline"
+                                  className="justify-start"
+                                  onClick={() => handleAssignDesigner(designer.id)}
+                                >
+                                  <div className="flex flex-col items-start">
+                                    <span className="font-medium">{designer.name}</span>
+                                    <span className="text-xs text-muted-foreground">{designer.type}</span>
+                                  </div>
+                                </Button>
+                              ))}
+                            </div>
+                          </DialogContent>
+                        </Dialog>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <Button variant="outline" size="sm" className="h-8 w-8 p-0 text-red-600 hover:text-red-700">
