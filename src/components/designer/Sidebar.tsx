@@ -37,22 +37,22 @@ import {
 import { cn } from "@/lib/utils";
 
 const workspaceItems = [
-  { title: "Dashboard", url: "/crm/dashboard", icon: LayoutDashboard },
-  { title: "Chat", url: "/crm/chat", icon: MessageCircle },
-  { title: "Statistics", url: "/crm/statistics", icon: BarChart3 },
-  { title: "Notifications", url: "/crm/notifications", icon: Bell },
-  { title: "Duck AI", url: "/crm/duck-ai", icon: MessageCircle },
-  { title: "Settings", url: "/crm/settings", icon: Settings },
+  { title: "Dashboard", url: "/designer/dashboard", icon: LayoutDashboard },
+  { title: "Chat", url: "/designer/chat", icon: MessageCircle },
+  { title: "Statistics", url: "/designer/statistics", icon: BarChart3 },
+  { title: "Notifications", url: "/designer/notifications", icon: Bell },
+  { title: "Duck AI", url: "/designer/duck-ai", icon: MessageCircle },
+  { title: "Settings", url: "/designer/settings", icon: Settings },
 ];
 
 const managementItems = [
-  { title: "Clients", url: "/crm/clients-management", icon: Users },
-  { title: "Designers", url: "/crm/designer-management", icon: User },
-  { title: "Projects", url: "/crm/projects-management", icon: FolderOpen, subItems: [
-    { title: "Overview", url: "/crm/projects-management", icon: Eye },
-    { title: "Contract", url: "/crm/projects-management/design", icon: FileText },
-    { title: "RFQ", url: "/crm/projects-management/manufacturing", icon: MessageSquare },
-    { title: "Invoice", url: "/crm/projects-management/completed", icon: Receipt },
+  { title: "Clients", url: "/designer/clients-management", icon: Users },
+  { title: "Designers", url: "/designer/designer-management", icon: User },
+  { title: "Projects", url: "/designer/projects-management", icon: FolderOpen, subItems: [
+    { title: "Overview", url: "/designer/projects-management", icon: Eye },
+    { title: "Contract", url: "/designer/projects-management/design", icon: FileText },
+    { title: "RFQ", url: "/designer/projects-management/manufacturing", icon: MessageSquare },
+    { title: "Invoice", url: "/designer/projects-management/completed", icon: Receipt },
   ]},
 ];
 
@@ -187,7 +187,7 @@ export function AppSidebar() {
           {state !== "collapsed" && (
             <div className="flex flex-col">
               <span className="font-bold text-lg text-foreground">Paking Duck</span>
-              <span className="text-sm text-muted-foreground">CRM</span>
+              <span className="text-sm text-muted-foreground">Designer Portal</span>
             </div>
           )}
         </div>
