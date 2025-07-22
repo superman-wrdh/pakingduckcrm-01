@@ -18,7 +18,7 @@ import { useState } from "react";
 import { useProjectsWithDesigners } from "@/hooks/useProjectsWithDesigners";
 import { useDesignerProfiles } from "@/hooks/useDesignerProfiles";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Projects = () => {
   const { projects, loading, getProjectStats, getStatusColor, assignDesignerToProject, unassignDesignerFromProject } = useProjectsWithDesigners();
