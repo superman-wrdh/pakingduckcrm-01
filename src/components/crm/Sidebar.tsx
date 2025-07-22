@@ -16,7 +16,11 @@ import {
   MessageSquare,
   Receipt,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  CheckSquare,
+  BookOpen,
+  Star,
+  Briefcase
 } from "lucide-react";
 const logo = "/lovable-uploads/a09bbeec-4835-42c5-ac6b-dee617792106.png";
 import {
@@ -36,24 +40,32 @@ import {
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 
-const workspaceItems = [
+const mainItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Chat", url: "/chat", icon: MessageCircle },
-  { title: "Statistics", url: "/statistics", icon: BarChart3 },
-  { title: "Notifications", url: "/notifications", icon: Bell },
-  { title: "Duck AI", url: "/duck-ai", icon: MessageCircle },
-  { title: "Settings", url: "/settings", icon: Settings },
+  { title: "My Projects", url: "/projects", icon: FolderOpen },
+  { title: "My Tasks", url: "/my-tasks", icon: CheckSquare },
+  { title: "Activity", url: "/activity", icon: Activity },
 ];
 
-const managementItems = [
-  { title: "Clients", url: "/clients-management", icon: Users },
-  { title: "Designers", url: "/designer-management", icon: User },
-  { title: "Projects", url: "/projects-management", icon: FolderOpen, subItems: [
-    { title: "Overview", url: "/projects-management", icon: Eye },
-    { title: "Contract", url: "/projects-management/design", icon: FileText },
-    { title: "RFQ", url: "/projects-management/manufacturing", icon: MessageSquare },
-    { title: "Invoice", url: "/projects-management/completed", icon: Receipt },
-  ]},
+const communicationItems = [
+  { title: "Chat", url: "/chat", icon: MessageCircle },
+  { title: "Duck AI", url: "/duck-ai", icon: MessageCircle },
+  { title: "Community", url: "/community", icon: Users },
+];
+
+const supportItems = [
+  { title: "How-To Guides", url: "/how-to", icon: BookOpen },
+  { title: "Help Center", url: "/guide", icon: HelpCircle },
+  { title: "RFQ", url: "/rfq", icon: MessageSquare },
+];
+
+const accountItems = [
+  { title: "Profile", url: "/profile", icon: User },
+  { title: "Payment", url: "/payment", icon: CreditCard },
+  { title: "Invoice", url: "/invoice", icon: Receipt },
+  { title: "Statistics", url: "/statistics", icon: BarChart3 },
+  { title: "Notifications", url: "/notifications", icon: Bell },
+  { title: "Settings", url: "/settings", icon: Settings },
 ];
 
 interface SidebarSectionProps {
@@ -110,67 +122,7 @@ function SidebarSection({ title, items }: SidebarSectionProps) {
   );
 }
 
-function ManagementSection({ title, items }: ManagementSectionProps) {
-  const location = useLocation();
-  const currentPath = location.pathname;
-  const { state } = useSidebar();
-  
-  return (
-    <SidebarGroup>
-      <SidebarGroupLabel>{title}</SidebarGroupLabel>
-      <SidebarGroupContent>
-        <SidebarMenu>
-          {items.map((item) => {
-            const Icon = item.icon;
-            const isActive = currentPath === item.url;
-            
-            return (
-              <SidebarMenuItem key={item.url}>
-                {item.subItems ? (
-                  <>
-                    <SidebarMenuButton className="w-full">
-                      <Icon className="h-4 w-4" />
-                      {state !== "collapsed" && <span>{item.title}</span>}
-                      {state !== "collapsed" && (
-                        <ChevronDown className="ml-auto h-4 w-4 transition-transform group-data-[state=open]:rotate-180" />
-                      )}
-                    </SidebarMenuButton>
-                    {state !== "collapsed" && (
-                      <SidebarMenuSub>
-                        {item.subItems.map((subItem) => {
-                          const SubIcon = subItem.icon;
-                          const isSubActive = currentPath === subItem.url;
-                          
-                          return (
-                            <SidebarMenuSubItem key={subItem.url}>
-                              <SidebarMenuSubButton asChild isActive={isSubActive}>
-                                <NavLink to={subItem.url}>
-                                  <SubIcon className="h-4 w-4" />
-                                  <span>{subItem.title}</span>
-                                </NavLink>
-                              </SidebarMenuSubButton>
-                            </SidebarMenuSubItem>
-                          );
-                        })}
-                      </SidebarMenuSub>
-                    )}
-                  </>
-                ) : (
-                  <SidebarMenuButton asChild isActive={isActive}>
-                    <NavLink to={item.url}>
-                      <Icon className="h-4 w-4" />
-                      {state !== "collapsed" && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                )}
-              </SidebarMenuItem>
-            );
-          })}
-        </SidebarMenu>
-      </SidebarGroupContent>
-    </SidebarGroup>
-  );
-}
+// ... keep existing code (ManagementSection - not used in client portal but keeping for potential future use)
 
 export function AppSidebar() {
   const { state } = useSidebar();
@@ -186,18 +138,18 @@ export function AppSidebar() {
           />
           {state !== "collapsed" && (
             <div className="flex flex-col">
-              <span className="font-bold text-lg text-foreground">Paking Duck</span>
-              <span className="text-sm text-muted-foreground">CRM</span>
+              <span className="font-bold text-lg text-foreground">Client Portal</span>
+              <span className="text-sm text-muted-foreground">Design Services</span>
             </div>
           )}
         </div>
       </SidebarHeader>
       
       <SidebarContent>
-        <SidebarSection title="Main" items={workspaceItems.slice(0, 1)} />
-        <ManagementSection title="Management" items={managementItems} />
-        <SidebarSection title="Workspace" items={workspaceItems.slice(1, 4)} />
-        <SidebarSection title="AI & Settings" items={[workspaceItems[4], workspaceItems[5]]} />
+        <SidebarSection title="Main" items={mainItems} />
+        <SidebarSection title="Communication" items={communicationItems} />
+        <SidebarSection title="Support" items={supportItems} />
+        <SidebarSection title="Account" items={accountItems} />
       </SidebarContent>
     </Sidebar>
   );

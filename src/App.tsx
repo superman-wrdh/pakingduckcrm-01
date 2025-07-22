@@ -4,13 +4,17 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme-provider";
-import { AuthProvider } from "@/hooks/useAuth";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { CRMLayout } from "@/components/layouts/CRMLayout";
+// Import all pages
 import Dashboard from "./pages/Dashboard";
 import Community from "./pages/Community";
 import Guide from "./pages/Guide";
+import HowTo from "./pages/HowTo";
 import Projects from "./pages/Projects";
+import MyTasks from "./pages/MyTasks";
+import Activity from "./pages/Activity";
 import Contract from "./pages/Contract";
 import Notifications from "./pages/Notifications";
 import DuckAI from "./pages/DuckAI";
@@ -18,12 +22,14 @@ import Profile from "./pages/Profile";
 import Chat from "./pages/Chat";
 import Payment from "./pages/Payment";
 import Statistics from "./pages/Statistics";
+import Settings from "./pages/Settings";
 import UpdatedSettings from "./pages/UpdatedSettings";
 import ClientsManagement from "./pages/ClientsManagement";
 import DesignerManagement from "./pages/DesignerManagement";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import NotFound from "./pages/NotFound";
+import Index from "./pages/Index";
 import RFQ from "./pages/RFQ";
 import Invoice from "./pages/Invoice";
 
@@ -38,7 +44,7 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
           <Routes>
-            <Route path="/" element={<SignIn />} />
+            <Route path="/" element={<Index />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/dashboard" element={
@@ -58,7 +64,7 @@ const App = () => (
             <Route path="/how-to" element={
               <ProtectedRoute>
                 <CRMLayout>
-                  <Guide />
+                  <HowTo />
                 </CRMLayout>
               </ProtectedRoute>
             } />
@@ -66,6 +72,20 @@ const App = () => (
               <ProtectedRoute>
                 <CRMLayout>
                   <Guide />
+                </CRMLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/my-tasks" element={
+              <ProtectedRoute>
+                <CRMLayout>
+                  <MyTasks />
+                </CRMLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/activity" element={
+              <ProtectedRoute>
+                <CRMLayout>
+                  <Activity />
                 </CRMLayout>
               </ProtectedRoute>
             } />
@@ -119,6 +139,13 @@ const App = () => (
               </ProtectedRoute>
             } />
             <Route path="/settings" element={
+              <ProtectedRoute>
+                <CRMLayout>
+                  <Settings />
+                </CRMLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/updated-settings" element={
               <ProtectedRoute>
                 <CRMLayout>
                   <UpdatedSettings />
